@@ -1,16 +1,19 @@
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-import ver03.AccountManager;
-import ver03.MenuChoice;
-import ver03.MenuSelectException;
+import ver04.AccountManager;
+import ver04.MenuChoice;
+import ver04.MenuSelectException;
 
 public class BankingSystemVer04  implements MenuChoice {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException{
 		
 		AccountManager accountManager = new AccountManager();
 		Scanner scanner = new Scanner(System.in);
+		
+		accountManager.load();
 		
 		while(true) {
 			try {
@@ -34,6 +37,7 @@ public class BankingSystemVer04  implements MenuChoice {
 					break;
 				case exit:
 					System.out.println("\n***종료합니다***\n");
+					accountManager.save();
 					System.exit(0);
 				}
 					

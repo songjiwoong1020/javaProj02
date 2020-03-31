@@ -1,23 +1,92 @@
 package ver04;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class AccountManager implements CustomSpecialRate{
 	
-	HashSet<Account> accountSet = new HashSet<Account>();
-	int arrNum = 0;
+	HashSet<Account> accountSet;
 	Scanner scanner = new Scanner(System.in);
+	
+	public void load() {
+		
+		try {
+			File file = new File("src/ver04/Account.obj");
+			if(file.exists()) {
+				System.out.println("\n=====실행 했을때 파일이 존재하면 진입=====\n");//마지막에 주석처리
+				ObjectInputStream in = 
+						new ObjectInputStream(
+								new FileInputStream("src/ver04/Account.obj"));
+				accountSet = (HashSet<Account>)in.readObject();
+				in.close();
+			} else {
+				System.out.println("\n=====실행 했을때 파일이 존재하지 않는다면 진입=====\n");//마지막에 주석처리
+
+				accountSet = new HashSet<Account>();
+			}
+		}
+		catch(Exception e) {
+//			System.out.println("\n=====load메소드에서 예외발생=====\n");//마지막에 주석처리
+			e.printStackTrace();
+		}
+	}
+
+	//저장
+	public void save() {
+		
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(
+					new FileOutputStream("src/ver04/Account.obj"));
+			
+			out.writeObject(accountSet);
+			System.out.println("\n=====시스템 종료시 save=====\n");//마지막에 주석처리
+			out.close();
+		}
+		catch (Exception e) {
+//			System.out.println("\n=====save메소드에서 예외발생=====\n");//마지막에 주석처리
+			e.printStackTrace();
+		}
+	}
+
 
 	public void showMenu() {
-		System.out.println("arrNum = " + arrNum);
 		System.out.println("-----Menu-----");
 		System.out.println("1. 계좌계설");
 		System.out.println("2. 입금");
 		System.out.println("3. 출금");
 		System.out.println("4. 전체계좌정보출력");
 		System.out.print("5. 프로그램종료\n선택: ");
+	}
+	
+	public String overlap() {
+		
+		String overlap;
+		
+		while(true) {
+			try {
+				System.out.print("덮어 씌우시겠습니까?(YES/NO)\n>");
+				overlap = scanner.nextLine();
+				
+				if(overlap.equalsIgnoreCase("NO")) {
+					System.out.println("입력을 취소합니다\n");
+					return overlap;
+				}else if(overlap.equalsIgnoreCase("YES")) {
+					return overlap;
+				} else {
+					System.out.println("잘못 입력했습니다.\n");
+				}
+			}
+			catch(Exception e) {
+				System.out.println("잘못 입력했습니다.\n");
+				scanner = new Scanner(System.in);
+			}
+		}
 	}
 	
 	public void makeAccount() {
@@ -46,9 +115,16 @@ public class AccountManager implements CustomSpecialRate{
 					System.out.print("기본이자%(정수형태로 입력) : ");
 					makeInterestRate = make(scanner.nextInt());
 					scanner.nextLine();
-					accountSet.add(new NormalAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate));
-					arrNum++;
-					System.out.println("\n보통계좌계설이 완료 되었습니다\n");
+					if(accountSet.add(new NormalAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate))) {
+						System.out.println("\n보통계좌계설이 완료 되었습니다\n");
+					} else {
+						System.out.println("동일한 계좌가 존재합니다.");
+							if(overlap().equalsIgnoreCase("YES")) {
+								accountSet.remove(new NormalAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate));
+								accountSet.add(new NormalAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate));
+								System.out.println("기존 계좌를 삭제하고 새로운 계좌를 생성합니다.");
+							}
+					}
 				} else if(select == 2) {
 					System.out.println("\n***신용 신뢰계좌개설***\n");
 					System.out.print("계좌번호 : ");
@@ -63,9 +139,17 @@ public class AccountManager implements CustomSpecialRate{
 					scanner.nextLine();
 					System.out.print("신용등급(A,B,C등급) : ");
 					makeCredit = make(scanner.next().charAt(0));
-					accountSet.add(new HighCreditAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate, makeCredit));
-					arrNum++;
-					System.out.println("\n신용 신뢰계좌계설이 완료 되었습니다\n");
+					if(accountSet.add(new HighCreditAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate, makeCredit))) {
+						System.out.println("\n신용 신뢰계좌계설이 완료 되었습니다\n");
+					} else {
+						System.out.println("동일한 계좌가 존재합니다.");
+							if(overlap().equalsIgnoreCase("YES")) {
+								accountSet.remove(new HighCreditAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate, makeCredit));
+								accountSet.add(new HighCreditAccount(makeAccountNumber, makeName, makeBalance, makeInterestRate, makeCredit));
+								System.out.println("기존 계좌를 삭제하고 새로운 계좌를 생성합니다.");
+							}
+					}
+					
 				} else if(select == 3) break;
 				else System.out.println("다시 입력하세요");
 			}
@@ -86,14 +170,14 @@ public class AccountManager implements CustomSpecialRate{
 			System.out.print("\n계좌번호를 입력하세요\n입력: ");
 			String depositAccountNumber = scanner.nextLine();
 			boolean a = true;
-			for(int i=0; i<arrNum; i++) {
+			for(Account list : accountSet) {
 				//계좌번호와 일치하는지 확인
-				if(accountArr[i].accountNumber.equals(depositAccountNumber)) {
+				if(list.accountNumber.equals(depositAccountNumber)) {
 					System.out.println("\n일치하는 계좌 존재\n");
-					if(accountArr[i] instanceof HighCreditAccount) {
-						System.out.println("\nHighCreditAccount 타입의 객체\n");
-						double normal = (((HighCreditAccount)accountArr[i]).interestRate)*0.01;//기본이자
-						char credit = (((HighCreditAccount)accountArr[i]).credit);
+					if(list instanceof HighCreditAccount) {
+//						System.out.println("\nHighCreditAccount 타입의 객체\n");
+						double normal = (((HighCreditAccount)list).interestRate)*0.01;//기본이자
+						char credit = (((HighCreditAccount)list).credit);
 						double check;
 						System.out.print("입금할 금액을 입력하세요(500원 단위만 가능)\n입력: ");
 						int in = in(scanner.nextInt());
@@ -101,29 +185,29 @@ public class AccountManager implements CustomSpecialRate{
 						
 						if(credit == 'A') {
 							check = A;
-							accountArr[i].balance = (int)((accountArr[i].balance*normal)
-									+ (accountArr[i].balance*check) + in + accountArr[i].balance);
+							list.balance = (int)((list.balance*normal)
+									+ (list.balance*check) + in + list.balance);
 						} else if(credit == 'B') {
 							check = B;
-							accountArr[i].balance = (int)((accountArr[i].balance*normal)
-									+ (accountArr[i].balance*check) + in + accountArr[i].balance);
+							list.balance = (int)((list.balance*normal)
+									+ (list.balance*check) + in + list.balance);
 						} else if(credit == 'C') {
 							check = C;
-							accountArr[i].balance = (int)((accountArr[i].balance*normal)
-									+ (accountArr[i].balance*check) + in + accountArr[i].balance);
+							list.balance = (int)((list.balance*normal)
+									+ (list.balance*check) + in + list.balance);
 						}
 						System.out.println(in + "원이 입금 되었습니다\n");
 						a = false;
 						break;
 						
-					} else if(accountArr[i] instanceof NormalAccount) {
-						System.out.println("\nNormalAccount 타입의 객체\n");
-						double normal = (((NormalAccount)accountArr[i]).interestRate)*0.01;
+					} else if(list instanceof NormalAccount) {
+//						System.out.println("\nNormalAccount 타입의 객체\n");
+						double normal = (((NormalAccount)list).interestRate)*0.01;
 						
-						System.out.print("입금할 금액을 입력하세요\n입력: ");
+						System.out.print("입금할 금액을 입력하세요(500원 단위만 가능)\n입력: ");
 						int in = in(scanner.nextInt());
 						scanner.nextLine();
-						accountArr[i].balance = (int)((accountArr[i].balance*normal)+in+accountArr[i].balance);
+						list.balance = (int)((list.balance*normal)+in+list.balance);
 						System.out.println(in + "원이 입금 되었습니다\n");
 						a = false;
 						break;
@@ -145,20 +229,20 @@ public class AccountManager implements CustomSpecialRate{
 			System.out.print("\n계좌번호를 입력하세요\n입력: ");
 			String depositAccountNumber = scanner.nextLine();
 			boolean a = true;
-			for(int i=0; i<arrNum; i++) {
-				if(accountArr[i].accountNumber.equals(depositAccountNumber)) {
+			for(Account list : accountSet) {
+				if(list.accountNumber.equals(depositAccountNumber)) {
 					System.out.print("출금할 금액을 입력하세요(1,000원 단위만 가능)\n입력: ");
 					int out = out(scanner.nextInt());
-					System.out.println("에러 미 발생시 진입");
+//					System.out.println("에러 미 발생시 진입");
 					scanner.nextLine();
-					if(accountArr[i].balance < out) {
+					if(list.balance < out) {
 						System.out.print("잔고가 부족합니다. 금액전체를 출금할까요?YES/NO\n> ");
 						String lack;
 						while(true) {
 							lack = scanner.nextLine();
 							if(lack.equalsIgnoreCase("YES")) {
-								System.out.println(accountArr[i].balance + "원을 출금합니다.");
-								accountArr[i].balance = 0;
+								System.out.println(list.balance + "원을 출금합니다.");
+								list.balance = 0;
 								break;
 							} else if(lack.equalsIgnoreCase("NO")) {
 								System.out.println("넵");
@@ -169,7 +253,7 @@ public class AccountManager implements CustomSpecialRate{
 						}
 						a = false;
 					} else {
-					accountArr[i].balance -= out;
+					list.balance -= out;
 					System.out.println(out + "원이 출금 되었습니다\n");
 					a = false;
 					break;
@@ -191,11 +275,16 @@ public class AccountManager implements CustomSpecialRate{
 	}
 	
 	public void showAccInfo() {
-		System.out.println("\n***계좌정보출력***\n");
-		for(int i=0; i<arrNum; i++) {
-			accountArr[i].showAccount();
+		
+		if(accountSet.isEmpty()) {
+			System.out.println("\n입력된 정보가 없습니다\n");
+		} else {
+			System.out.println("\n***계좌정보출력***\n");
+			for(Account list : accountSet) {
+				list.showAccount();
+			}
+			System.out.println("\n전체계좌정보 출력이 완료되었습니다\n");
 		}
-		System.out.println("\n전체계좌정보 출력이 완료되었습니다\n");
 	}
 	
 	public int userNum(int user) throws MenuSelectException{
