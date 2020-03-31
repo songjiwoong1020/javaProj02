@@ -15,6 +15,8 @@ public class BankingSystemVer05  implements MenuChoice {
 		
 		Account account = new Account(id, pass);
 		
+		account.test();
+		
 		while(true) {
 			
 			account.showMenu();
@@ -35,6 +37,7 @@ public class BankingSystemVer05  implements MenuChoice {
 				account.showAccInfo();
 				break;
 			case exit:
+				account.close();
 				System.out.println("\n***종료합니다***\n");
 				System.exit(0);
 			}

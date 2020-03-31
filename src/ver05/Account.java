@@ -1,5 +1,6 @@
 package ver05;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Account extends ConnectImpl  {
@@ -10,11 +11,10 @@ public class Account extends ConnectImpl  {
 		super(id, pass);
 	}
 	
-	public void login() {
+	public void test() {
 		
-//		System.out.println("test진입");
 		try {
-			String query = "select count(*) from all_tables where banking_tb = upper('phonebook_tb')";
+			String query = "select count(*) from all_tables where table_name = upper('banking_tb')";
 			
 			stmt = con.createStatement();
 			
@@ -50,13 +50,99 @@ public class Account extends ConnectImpl  {
 	
 	public void makeAccount() {
 		System.out.println("\n***신규계좌개설***\n");
+		try {
+		String query = "INSERT INTO banking_tb VALUES (?, ?, ?)";
+		
+		psmt = con.prepareStatement(query);
+		
+		System.out.println("데이터 입력을 시작합니다..");
+		System.out.print("계좌번호 : ");
+		String accountNumber = scanner.nextLine();
+		System.out.print("이름 : ");
+		String name = scanner.nextLine();
+		System.out.print("잔고 : ");
+		String balance = scanner.nextLine();
+		
+		psmt.setString(1, accountNumber);
+		psmt.setString(2, name);
+		psmt.setString(3, balance);
+		System.out.println(psmt.executeUpdate() + "행이 입력되었습니다.");
+		}
+		
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	public void depositMoney() {
 		System.out.println("\n***입금***\n");
+		
+		System.out.print("계좌 번호 : ");
+		String acountN = scanner.nextLine();
+		System.out.print("입금할 금액 : ");
+		int money = scanner.nextInt();
+		scanner.nextLine();
+		
+		String sql = "UPDATE banking_tb SET balance = balance + ? WHERE accountNumber = ?";
+		try {
+			psmt = con.prepareStatement(sql);
+			
+				psmt.setInt(1, money);
+				psmt.setString(2, acountN);
+
+				int affected = psmt.executeUpdate();
+				System.out.println(affected +"행이 업데이트 되었습니다.");
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
 	}
+	
 	public void withdrawMoney() {
 		System.out.println("\n***출금***\n");
+		
+		System.out.print("계좌 번호 : ");
+		String acountN = scanner.nextLine();
+		System.out.print("출금할 금액 : ");
+		int money = scanner.nextInt();
+		scanner.nextLine();
+		
+		String sql = "UPDATE banking_tb SET balance = balance - ? WHERE accountNumber = ?";
+		try {
+			psmt = con.prepareStatement(sql);
+			
+				psmt.setInt(1, money);
+				psmt.setString(2, acountN);
+
+				int affected = psmt.executeUpdate();
+				System.out.println(affected +"행이 업데이트 되었습니다.");
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
+		
 	}
 	public void showAccInfo() {
+		try {
+			stmt = con.createStatement();
+			
+			String query = "SELECT * FROM banking_tb";
+				
+			rs = stmt.executeQuery(query);
+			System.out.println("-계좌번호-    -이름-   -잔고-");
+			while(rs.next()) {
+				String accountNumber = rs.getString("accountNumber");
+				String name = rs.getString("name");
+				String balance = rs.getString("balance");
+				System.out.printf("%-5s %-10s %-10s\n", accountNumber, name, balance);
+			}
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
