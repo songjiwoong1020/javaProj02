@@ -1,7 +1,9 @@
 package threebythree;
 
 import java.util.Scanner;
-
+/*
+일단 움직이는것 부터 만들어 보라는 아이디어를 친구가 알려줌 ㅠㅠ
+ */
 public class ThreeByThreeMain {
 
 	public static void main(String[] args) {
@@ -9,15 +11,32 @@ public class ThreeByThreeMain {
 		Scanner scanner = new Scanner(System.in);
 		Game gamePlay = new Game();
 		
-		gamePlay.show();
 		
-		System.out.println("입력");
-		String a = scanner.nextLine();
-		if(a.equalsIgnoreCase("A")) {
-			gamePlay.left();
+
+		gamePlay.shuffle();
+		
+		System.out.println("3by3게임을 시작합니다.\n중간에 종료하고싶으면 exit를 입력하세요^^");
+		
+		gamePlay.show();
+		while(true) {
+			System.out.println("입력>");
+			String move = scanner.nextLine();
+			if(move.equalsIgnoreCase("A")) {
+				gamePlay.left();
+			} else if(move.equalsIgnoreCase("D")) {
+				gamePlay.right();
+			} else if(move.equalsIgnoreCase("S")) {
+				gamePlay.down();
+			} else if(move.equalsIgnoreCase("w")) {
+				gamePlay.up();
+			} else if(move.equalsIgnoreCase("exit")) {
+				System.out.println("게임을 종료합니다.");
+				System.exit(0);
+			} else {
+				gamePlay.show();
+				System.out.println("A,S,D,W 키로 이동합니다.");
+			}
 		}
-		
-		gamePlay.show();
 		
 		/**
 		

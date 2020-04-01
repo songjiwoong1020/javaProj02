@@ -38,6 +38,7 @@ public class BankingSystemVer04  implements MenuChoice {
 				case exit:
 					System.out.println("\n***종료합니다***\n");
 					accountManager.save();
+					scanner.close();
 					System.exit(0);
 				}
 					
@@ -51,5 +52,4 @@ public class BankingSystemVer04  implements MenuChoice {
 			}
 		}
 	}
-
 }

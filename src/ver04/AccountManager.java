@@ -79,11 +79,11 @@ public class AccountManager implements CustomSpecialRate{
 				}else if(overlap.equalsIgnoreCase("YES")) {
 					return overlap;
 				} else {
-					System.out.println("잘못 입력했습니다.\n");
+					System.out.println("잘못 입력했습니다.(if문)\n");
 				}
 			}
 			catch(Exception e) {
-				System.out.println("잘못 입력했습니다.\n");
+				System.out.println("잘못 입력했습니다.(예외)\n");
 				scanner = new Scanner(System.in);
 			}
 		}
@@ -219,6 +219,9 @@ public class AccountManager implements CustomSpecialRate{
 			}
 		}catch(MenuSelectException e) {
 			System.out.println(e.getMessage());
+		}catch(InputMismatchException e) {
+			System.out.println("금액은 정수만 입력 가능합니다.");
+			scanner.nextLine();
 		}
 	}
 	

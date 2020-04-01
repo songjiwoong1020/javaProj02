@@ -39,6 +39,7 @@ public class BankingSystemVer05  implements MenuChoice {
 			case exit:
 				account.close();
 				System.out.println("\n***종료합니다***\n");
+				scanner.close();
 				System.exit(0);
 			}
 			
